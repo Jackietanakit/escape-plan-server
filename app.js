@@ -10,15 +10,23 @@ const io = new Server(3000, {
   },
 });
 
-const { reqInfo } = require("./listeners/userHandler")(io);
+let map = [
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+];
+
+const { reqInfo, disconnect } = require("./listeners/userHandler")(io);
 // const { createMap, updateCoor } = require("./listeners/gameHandler")(io, map);
 
 const onConnection = (socket) => {
-  let map = [1, 1, 1, 1, 1];
   console.log(`Client connected [id=${socket.id}]`);
   socket.on("player:create", reqInfo);
 
   // socket.on("map:create", createMap);
   // socket.on("coor:update", updateCoor);
+  socket.on("disconnect", disconnect);
 };
 io.on("connection", onConnection);
