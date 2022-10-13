@@ -1,4 +1,4 @@
-module.exports = (io, map, pCoor, wCoor) => {
+module.exports = (io) => {
   const createMap = function () {
     // function to create Map
     map = [
@@ -15,29 +15,25 @@ module.exports = (io, map, pCoor, wCoor) => {
     if (role == "prisoner") pCoor = coordinate;
     if (role == "warder") wCoor = coordinate;
     if (pCoor != [] && wCoor != []) {
-      updateMap(pCoor, wCoor);
+      for (let i in map) {
+        for (let j in map[i]) {
+          if (map[i][j] == "p") {
+            map[i][j] = 0;
+          } else if (map[i][j] == "w") {
+            map[i][j] = 0;
+          }
+        }
+      }
+      if (map[pCoor[0]][pCoor[1]] == "h")
+        socket.emit("coor:update-done", "Prisoner Win!");
+      else map[pCoor[0]][pCoor[1]] = "p";
+      if (map[wCoor[0]][wCoor[1]] == "p")
+        socket.emit("coor:update-done", "Warder Win!");
+      else map[wCoor[0]][wCoor[1]] = "w";
+      socket.emit("coor:update-done", map);
       pCoor = [];
       wCoor = [];
     }
-  };
-
-  const updateMap = function (pCoor, wCoor) {
-    for (let i in map) {
-      for (let j in map[i]) {
-        if (map[i][j] == "p") {
-          map[i][j] = 0;
-        } else if (map[i][j] == "w") {
-          map[i][j] = 0;
-        }
-      }
-    }
-    if (map[pCoor[0]][pCoor[1]] == "h")
-      socket.emit("coor:update-done", "Prisoner Win!");
-    else map[pCoor[0]][pCoor[1]] = "p";
-    if (map[wCoor[0]][wCoor[1]] == "p")
-      socket.emit("coor:update-done", "Warder Win!");
-    else map[wCoor[0]][wCoor[1]] = "w";
-    socket.emit("coor:update-done", map);
   };
 
   return {
