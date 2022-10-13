@@ -18,8 +18,8 @@ let map = [
 let pCoor = [];
 let wCoor = [];
 
-const { getPlayerName } = require("./listeners/userHandler")(io);
-const { generateMap, sendCoor } = require("./listeners/gameHandler")(
+const { reqInfo } = require("./listeners/userHandler")(io);
+const { createMap, updateCoor } = require("./listeners/gameHandler")(
   io,
   map,
   pCoor,
@@ -27,10 +27,10 @@ const { generateMap, sendCoor } = require("./listeners/gameHandler")(
 );
 
 const onConnection = (socket) => {
-  socket.on("send:player-name", getPlayerName);
+  socket.on("player:create", reqInfo);
 
-  socket.on("send:map", generateMap);
-  socket.on("send:coordinate", sendCoor);
+  socket.on("map:create", createMap);
+  socket.on("coor:update", updateCoor);
 };
 io.on("connection", onConnection);
 

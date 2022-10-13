@@ -1,10 +1,12 @@
 module.exports = (io) => {
-  const getPlayerName = function (name) {
+  const reqInfo = function (name, avatar) {
     const socket = this;
-    socket.broadcast.emit("receive-player-name", name);
+
+    socket.broadcast.emit("player:create-done", name, avatar, role);
   };
+  const sendPlayerRole = function () {};
 
   return {
-    getPlayerName,
+    reqInfo,
   };
 };
