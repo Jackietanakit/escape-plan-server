@@ -20,9 +20,8 @@ const io = new Server(server, {
 });
 
 const { getUserInfo, disconnect } = require('./listeners/userHandler')(io);
-const { createRoom, joinRoom, updateCoor } = require('./listeners/gameHandler')(
-  io
-);
+const { createRoom, joinRoom, deleteRoom, updateCoor } =
+  require('./listeners/gameHandler')(io);
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
@@ -30,6 +29,7 @@ const onConnection = (socket) => {
   socket.on('disconnect', disconnect);
 
   socket.on('room:create', createRoom);
+  socket.on('room:delete', deleteRoom);
   socket.on('room:join', joinRoom);
 
   socket.on('coor:update', updateCoor);

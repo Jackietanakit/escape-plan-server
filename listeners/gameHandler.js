@@ -54,6 +54,11 @@ module.exports = (io) => {
     io.emit('coor:update-done', socketRoom[i].mapDetail, message);
   };
 
+  const deleteRoom = function () {
+    socketRoom = [];
+    io.emit('room:delete-done', socketRoom, 'No more room!');
+  };
+
   return {
     createRoom,
     joinRoom,
