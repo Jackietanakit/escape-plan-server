@@ -1,13 +1,17 @@
 const { generateMap } = require('./helper');
 
-export class GameElement {
-  constructor(roomId, userData) {
+class GameElement {
+  constructor(roomId, userName) {
+    this.status = 'waiting';
     this.roomId = roomId;
     this.mapDetail = generateMap();
-    this.userInfo = [userData];
+    this.currentUser = [userName];
   }
 
-  addUser(userData) {
-    this.userInfo.push(userData);
+  addUser(userName) {
+    this.currentUser.push(userName);
   }
 }
+
+module.exports = { GameElement };
+// status: waiting, starting, playing

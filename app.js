@@ -13,14 +13,19 @@ const io = new Server(8000, {
 });
 
 const { getUserInfo, disconnect } = require('./listeners/userHandler')(io);
-const { createMap, updateCoor } = require('./listeners/gameHandler')(io);
+const { createRoom, joinRoom, updateCoor } = require('./listeners/gameHandler')(
+  io
+);
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
   socket.on('player:login', getUserInfo);
   socket.on('disconnect', disconnect);
 
-  socket.on('map:create', createMap);
+  socket.on('room:create', createRoom);
+  socket.on('room:join', joinRoom);
+
   socket.on('coor:update', updateCoor);
 };
+
 io.on('connection', onConnection);
