@@ -1,15 +1,16 @@
 module.exports = (io) => {
-  const socket = this;
-  const reqInfo = function (name, avatar) {
-    const role = "prisoner";
-    socket.broadcast.emit("player:create-done", name, avatar, role);
+  const getUserInfo = function (name, avatar) {
+    const socket = this;
+    const role = 'prisoner';
+    io.emit('player:create-done', `Fuck you ${name}`, avatar, role);
   };
   const disconnect = function () {
-    console.log(`Client disconnected [id${socket.id}]`);
+    const socket = this;
+    console.log(`Client disconnected [id=${socket.id}]`);
   };
 
   return {
-    reqInfo,
+    getUserInfo,
     disconnect,
   };
 };
