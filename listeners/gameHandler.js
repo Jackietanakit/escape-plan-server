@@ -63,5 +63,6 @@ module.exports = (io) => {
     createRoom,
     joinRoom,
     updateCoor,
+    deleteRoom,
   };
 };
