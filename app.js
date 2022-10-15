@@ -1,6 +1,13 @@
+const express = require('express');
+const http = require('http');
 const { Server } = require('socket.io');
 
-const io = new Server(8000, {
+const PORT = process.env.PORT || 8000;
+
+const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
   cors: {
     origin: [
       'http://192.168.1.151:8080',
@@ -28,4 +35,10 @@ const onConnection = (socket) => {
   socket.on('coor:update', updateCoor);
 };
 
+app.get('/', (req, res) => {
+  res.send('<h1>Hello World</h1>');
+});
+
 io.on('connection', onConnection);
+
+server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
