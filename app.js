@@ -13,21 +13,27 @@ const io = new Server(server, {
   },
 });
 
-const { getUserInfo, disconnect } = require('./listeners/userHandler')(io);
-const { createRoom, joinRoom, deleteRoom, updateCoor, getCurrentRoom } =
-  require('./listeners/gameHandler')(io);
+var socketRoom = [];
+var userInSocket = [];
+
+const { leaveRoom, disconnect } = require('./listeners/userHandler')(
+  io,
+  socketRoom,
+  userInSocket
+);
+const { createRoom, joinRoom, updateCoor, deleteRoom, getCurrentRoom } =
+  require('./listeners/roomHandler')(io, socketRoom, userInSocket);
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
-  socket.on('player:login', getUserInfo);
+  socket.on('user:leave', leaveRoom);
   socket.on('disconnect', disconnect);
 
   socket.on('room:create', createRoom);
-  socket.on('room:delete', deleteRoom);
   socket.on('room:join', joinRoom);
-  socket.on('room:current-room', getCurrentRoom);
-
   socket.on('coor:update', updateCoor);
+  socket.on('room:delete', deleteRoom);
+  socket.on('room:current', getCurrentRoom);
 };
 
 app.get('/', (req, res) => {

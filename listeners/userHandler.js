@@ -1,16 +1,14 @@
 const { createUser, findUser } = require('../schema/user');
 
-module.exports = (io) => {
-  const getUserInfo = async function (name, avatar) {
+module.exports = (io, socketRoom, userInSocket) => {
+  const leaveRoom = function () {
     const socket = this;
-    const role = 'prisoner';
-    var userData = await findUser(name);
-    if (userData == null) {
-      userData = { name: name, score: 0 };
-      createUser(userData);
-    }
-    socket.userName = name;
-    io.emit('player:login-done', userData, avatar, role);
+    var i = socketRoom.findIndex((x) => x.roomId === roomId);
+    socketRoom[i].removeUser(socket.userInfo.name);
+    socket.leave(socket.roomId);
+    socket.roomId = null;
+    console.log(`User [id=${socket.id} leave room [id=${roomId}]]`);
+    io.emit('user:leave-done', socket.userInfo);
   };
 
   const disconnect = function () {
@@ -19,7 +17,7 @@ module.exports = (io) => {
   };
 
   return {
-    getUserInfo,
+    leaveRoom,
     disconnect,
   };
 };

@@ -1,32 +1,40 @@
-const { equals, makeId } = require('../util/helper');
+const { equals, makeId, userLogin } = require('../util/helper');
 const { GameElement } = require('../util/gameElement');
 
-var socketRoom = [];
-module.exports = (io) => {
-  const createRoom = function () {
+module.exports = (io, socketRoom, userInSocket) => {
+  const createRoom = function (name, avatarId) {
     const socket = this;
-
-    var roomId = makeId(6);
-    socket.join(roomId);
-    socket.roomId = roomId;
-    var roomData = new GameElement(roomId, socket.userName);
-    socketRoom.push(roomData);
-    io.emit('room:create-done', roomData.roomId);
+    if (userInSocket.includes(name)) {
+      io.emit('error', 'user already login');
+    } else {
+      userLogin(name, avatarId, userInSocket, socket);
+      var roomId = makeId(6);
+      socket.join(roomId);
+      socket.roomId = roomId;
+      var gameElement = new GameElement(roomId, socket.userName);
+      socketRoom.push(gameElement);
+      io.emit('room:create-done', gameElement.roomId);
+    }
   };
 
-  const joinRoom = function (roomId) {
+  const joinRoom = function (name, avatarId, roomId) {
     const socket = this;
-    if (!socketRoom.find((x) => x.roomId == roomId)) {
+    if (userInSocket.includes(name)) {
+      io.emit('error', 'user already login');
+    } else if (!socketRoom.find((x) => x.roomId == roomId)) {
       socket.emit('error', 'no such room');
     } else {
+      userLogin(name, avatarId, userInSocket, socket);
       socket.join(roomId);
       socket.roomId = roomId;
 
       var i = socketRoom.findIndex((x) => x.roomId === roomId);
       socketRoom[i].addUser(socket.userName);
 
-      if (socketRoom[i].currentUser.length == 2)
+      if (socketRoom[i].currentUser.length == 2) {
         socketRoom[i].status = 'starting';
+        socketRoom[i].randomRole();
+      }
 
       io.emit('room:join-done', socketRoom[i]);
     }
@@ -58,13 +66,13 @@ module.exports = (io) => {
     io.emit('coor:update-done', socketRoom[i].mapDetail, message);
   };
 
-  const deleteRoom = function () {
-    socketRoom = [];
-    io.emit('room:delete-done', socketRoom, 'No more room!');
+  const deleteRoom = function (roomId) {
+    socketRoom = socketRoom.filter((x) => x.roomId != roomId);
+    io.emit('room:delete-done', socketRoom);
   };
 
   const getCurrentRoom = function () {
-    io.emit('room:current-room-done', socketRoom);
+    io.emit('room:current-done', socketRoom);
   };
 
   return {
