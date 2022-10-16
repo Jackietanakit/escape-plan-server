@@ -59,10 +59,15 @@ module.exports = (io) => {
     io.emit('room:delete-done', socketRoom, 'No more room!');
   };
 
+  const getCurrentRoom = function () {
+    io.emit('room:current-room-done', socketRoom);
+  };
+
   return {
     createRoom,
     joinRoom,
     updateCoor,
     deleteRoom,
+    getCurrentRoom,
   };
 };

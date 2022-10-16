@@ -9,18 +9,12 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://192.168.1.151:8080',
-      'http://192.168.1.109:3000',
-      'https://172.20.10.7:3000',
-      'http://localhost:3000',
-      'http://localhost:8080',
-    ],
+    origin: ['*'],
   },
 });
 
 const { getUserInfo, disconnect } = require('./listeners/userHandler')(io);
-const { createRoom, joinRoom, deleteRoom, updateCoor } =
+const { createRoom, joinRoom, deleteRoom, updateCoor, getCurrentRoom } =
   require('./listeners/gameHandler')(io);
 
 const onConnection = (socket) => {
@@ -31,6 +25,7 @@ const onConnection = (socket) => {
   socket.on('room:create', createRoom);
   socket.on('room:delete', deleteRoom);
   socket.on('room:join', joinRoom);
+  socket.on('room:current-room', getCurrentRoom);
 
   socket.on('coor:update', updateCoor);
 };
