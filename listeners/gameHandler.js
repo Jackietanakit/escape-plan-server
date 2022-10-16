@@ -16,16 +16,20 @@ module.exports = (io) => {
 
   const joinRoom = function (roomId) {
     const socket = this;
-    socket.join(roomId);
-    socket.roomId = roomId;
+    if (!socketRoom.find((x) => x.roomId == roomId)) {
+      socket.emit('error', 'no such room');
+    } else {
+      socket.join(roomId);
+      socket.roomId = roomId;
 
-    var i = socketRoom.findIndex((x) => x.roomId === roomId);
-    socketRoom[i].addUser(socket.userName);
+      var i = socketRoom.findIndex((x) => x.roomId === roomId);
+      socketRoom[i].addUser(socket.userName);
 
-    if (socketRoom[i].currentUser.length == 2)
-      socketRoom[i].status = 'starting';
+      if (socketRoom[i].currentUser.length == 2)
+        socketRoom[i].status = 'starting';
 
-    io.emit('room:join-done', socketRoom[i]);
+      io.emit('room:join-done', socketRoom[i]);
+    }
   };
 
   const updateCoor = function (coordinate, role) {

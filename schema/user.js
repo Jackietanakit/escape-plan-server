@@ -7,7 +7,7 @@ const createUser = async (userData) => {
     .collection('users')
     .insertOne(userData)
     .then(() => {});
-  console.log(`Added on username: ${userName}`);
+  console.log(`Added on username: ${userData.name}`);
 };
 
 const findUser = async (userName) => {
