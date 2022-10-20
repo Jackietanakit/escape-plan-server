@@ -1,29 +1,31 @@
 const { generateMap } = require('./helper');
 
 class GameElement {
-  constructor(roomId, userName) {
+  constructor(roomId, name) {
     this.status = 'waiting';
     this.roomId = roomId;
     this.mapDetail = generateMap();
-    this.currentUser = [userName];
+    this.currentUser = [name];
     this.role = {
       prisoner: null,
       warder: null,
     };
   }
 
-  addUser(userName) {
-    this.currentUser.push(userName);
+  addUser(name) {
+    this.currentUser.push(name);
   }
 
-  removeUser(userName) {
-    this.currentUser = this.currentUser.filter((x) => x != userName);
+  removeUser(name) {
+    this.currentUser = this.currentUser.filter((x) => x != name);
   }
 
-  randomRole() {
-    let index = Math.floor(Math.random() * 2);
-    this.role.prisoner = this.currentUser(index);
-    this.role.warder = index == 0 ? this.currentUser[1] : this.currentUser[0];
+  giveRole(name) {
+    let index = -1;
+    if (!name) index = Math.floor(Math.random() * 2);
+    else index = this.currentUser.findIndex((x) => x == name);
+    this.role.warder = this.currentUser(index);
+    this.role.prisoner = index == 0 ? this.currentUser[1] : this.currentUser[0];
   }
 }
 

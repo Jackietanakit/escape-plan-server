@@ -21,7 +21,7 @@ const { leaveRoom, disconnect } = require('./listeners/userHandler')(
   socketRoom,
   userInSocket
 );
-const { createRoom, joinRoom, updateCoor, deleteRoom, getCurrentRoom } =
+const { createRoom, joinRoom, deleteRoom, getCurrentRoom } =
   require('./listeners/roomHandler')(io, socketRoom, userInSocket);
 
 const onConnection = (socket) => {
@@ -31,7 +31,6 @@ const onConnection = (socket) => {
 
   socket.on('room:create', createRoom);
   socket.on('room:join', joinRoom);
-  socket.on('coor:update', updateCoor);
   socket.on('room:delete', deleteRoom);
   socket.on('room:current', getCurrentRoom);
 };

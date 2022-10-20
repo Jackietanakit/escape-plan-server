@@ -10,8 +10,17 @@ const createUser = async (userData) => {
   console.log(`Added on username: ${userData.name}`);
 };
 
-const findUser = async (userName) => {
-  return await dbo.collection('users').findOne({ name: userName });
+const findUser = async (name) => {
+  return await dbo.collection('users').findOne({ name: name });
 };
 
-module.exports = { createUser, findUser };
+const updateUserScore = async (userData) => {
+  return await dbo
+    .collection('users')
+    .updateOne(
+      { name: userData.name },
+      { $set: { score: userData.score + 1 } }
+    );
+};
+
+module.exports = { createUser, findUser, updateUserScore };

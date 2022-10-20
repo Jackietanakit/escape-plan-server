@@ -1,7 +1,5 @@
 const { createUser, findUser } = require('../schema/user');
 
-const equals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-
 const generateMap = () => {
   let map = [
     [0, 0, 0, 0, 'h'],
@@ -42,9 +40,8 @@ const userLogin = async (name, avatarId, userInSocket, socket) => {
     name: name,
     score: userData.score,
     avatarId: avatarId,
-    role: null,
   };
   userInSocket.push(name);
 };
 
-module.exports = { equals, generateMap, makeId, userLogin };
+module.exports = { generateMap, makeId, userLogin };

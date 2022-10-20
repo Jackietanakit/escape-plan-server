@@ -1,11 +1,11 @@
-const { equals, makeId, userLogin } = require('../util/helper');
+const { makeId, userLogin } = require('../util/helper');
 const { GameElement } = require('../util/gameElement');
 
 module.exports = (io, socketRoom, userInSocket) => {
   const createRoom = function (name, avatarId) {
     const socket = this;
     if (userInSocket.includes(name)) {
-      io.emit('error', 'user already login');
+      io.emit('user-error', 'user already login');
     } else {
       userLogin(name, avatarId, userInSocket, socket);
       var roomId = makeId(6);
@@ -13,16 +13,16 @@ module.exports = (io, socketRoom, userInSocket) => {
       socket.roomId = roomId;
       var gameElement = new GameElement(roomId, socket.userName);
       socketRoom.push(gameElement);
-      io.emit('room:create-done', gameElement.roomId);
+      io.emit('room:create-done', gameElement.roomId, socket.userInfo);
     }
   };
 
   const joinRoom = function (name, avatarId, roomId) {
     const socket = this;
     if (userInSocket.includes(name)) {
-      io.emit('error', 'user already login');
+      io.emit('user-error', 'user already login');
     } else if (!socketRoom.find((x) => x.roomId == roomId)) {
-      socket.emit('error', 'no such room');
+      socket.emit('room-error', 'no such room');
     } else {
       userLogin(name, avatarId, userInSocket, socket);
       socket.join(roomId);
@@ -33,37 +33,11 @@ module.exports = (io, socketRoom, userInSocket) => {
 
       if (socketRoom[i].currentUser.length == 2) {
         socketRoom[i].status = 'starting';
-        socketRoom[i].randomRole();
+        socketRoom[i].giveRole(null);
       }
 
-      io.emit('room:join-done', socketRoom[i]);
+      io.emit('room:join-done', socketRoom[i], socket.userInfo);
     }
-  };
-
-  const updateCoor = function (coordinate, role) {
-    const socket = this;
-    let message = '';
-    var i = socketRoom.findIndex((x) => x.roomId === socket.roomId);
-    var mapDetail = socketRoom[i].mapDetail;
-    if (role == 'prisoner') {
-      if (equals(coordinate, mapDetail.hCoor)) {
-        message = 'Prisoner win!';
-      } else {
-        mapDetail.map[mapDetail.pCoor[0]][mapDetail.pCoor[1]] = 0;
-        mapDetail.map[coordinate[0]][coordinate[1]] = 'p';
-        mapDetail.pCoor = coordinate;
-      }
-    } else if (role == 'warder') {
-      if (equals(coordinate, mapDetail.pCoor)) {
-        message = 'Warder win!';
-      } else {
-        mapDetail.map[mapDetail.pCoor[0]][mapDetail.pCoor[1]] = 0;
-        mapDetail.map[coordinate[0]][coordinate[1]] = 'p';
-        mapDetail.pCoor = coordinate;
-      }
-    }
-    socketRoom[i].mapDetail = mapDetail;
-    io.emit('coor:update-done', socketRoom[i].mapDetail, message);
   };
 
   const deleteRoom = function (roomId) {
@@ -78,7 +52,6 @@ module.exports = (io, socketRoom, userInSocket) => {
   return {
     createRoom,
     joinRoom,
-    updateCoor,
     deleteRoom,
     getCurrentRoom,
   };
