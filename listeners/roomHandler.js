@@ -8,10 +8,10 @@ module.exports = (io, socketRoom, userInSocket) => {
       io.emit('user-error', 'user already login');
     } else {
       userLogin(name, avatarId, userInSocket, socket);
-      var roomId = makeId(6);
+      let roomId = makeId(6);
       socket.join(roomId);
       socket.roomId = roomId;
-      var gameElement = new GameElement(roomId, socket.userName);
+      let gameElement = new GameElement(roomId, socket.userName);
       socketRoom.push(gameElement);
       io.emit('room:create-done', gameElement.roomId, socket.userInfo);
     }
@@ -28,16 +28,26 @@ module.exports = (io, socketRoom, userInSocket) => {
       socket.join(roomId);
       socket.roomId = roomId;
 
-      var i = socketRoom.findIndex((x) => x.roomId === roomId);
-      socketRoom[i].addUser(socket.userName);
-
-      if (socketRoom[i].currentUser.length == 2) {
-        socketRoom[i].status = 'starting';
-        socketRoom[i].giveRole(null);
-      }
-
-      io.emit('room:join-done', socketRoom[i], socket.userInfo);
+      let i = socketRoom.findIndex((x) => x.roomId === roomId);
+      if (socketRoom[i].user.length < 2) socketRoom[i].addUser(name);
+      io.emit('room:join-done', socketRoom[i].user[1].name, socket.userInfo);
     }
+  };
+
+  const startRoom = function () {
+    let i = socketRoom.findIndex((x) => x.roomId === socket.roomId);
+    socketRoom[i].status = 'starting';
+    io.emit('room:start-done', socketRoom[i]);
+  };
+
+  const leaveRoom = function () {
+    const socket = this;
+    var i = socketRoom.findIndex((x) => x.roomId === roomId);
+    socketRoom[i].removeUser(socket.userInfo.name);
+    socket.leave(socket.roomId);
+    if (socket.roomId) delete socket.roomId;
+    console.log(`User [id=${socket.id} leave room [id=${roomId}]]`);
+    io.emit('user:leave-done', socket.userInfo);
   };
 
   const deleteRoom = function (roomId) {
@@ -52,6 +62,8 @@ module.exports = (io, socketRoom, userInSocket) => {
   return {
     createRoom,
     joinRoom,
+    startRoom,
+    leaveRoom,
     deleteRoom,
     getCurrentRoom,
   };

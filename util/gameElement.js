@@ -5,27 +5,28 @@ class GameElement {
     this.status = 'waiting';
     this.roomId = roomId;
     this.mapDetail = generateMap();
-    this.currentUser = [name];
-    this.role = {
-      prisoner: null,
-      warder: null,
-    };
+    this.user = { name: name, role: 'host' };
+    this.role = { prisoner: null, warder: null };
+  }
+
+  createMap() {
+    this.mapDetail = generateMap();
   }
 
   addUser(name) {
-    this.currentUser.push(name);
+    this.user = { name: name, role: 'member' };
   }
 
   removeUser(name) {
-    this.currentUser = this.currentUser.filter((x) => x != name);
+    this.user = this.user.filter((x) => x.name != name);
   }
 
   giveRole(name) {
     let index = -1;
-    if (!name) index = Math.floor(Math.random() * 2);
-    else index = this.currentUser.findIndex((x) => x == name);
-    this.role.warder = this.currentUser(index);
-    this.role.prisoner = index == 0 ? this.currentUser[1] : this.currentUser[0];
+    if (name) index = Math.floor(Math.random() * 2);
+    else index = this.user.findIndex((x) => x.name == name);
+    this.role.warder = this.user[index].name;
+    this.role.prisoner = index == 0 ? this.user[1].name : this.user[0].name;
   }
 }
 
