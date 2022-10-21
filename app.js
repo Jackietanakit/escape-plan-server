@@ -16,23 +16,33 @@ const io = new Server(server, {
 var socketRoom = [];
 var userInSocket = [];
 
-const { leaveRoom, disconnect } = require('./listeners/userHandler')(
-  io,
-  socketRoom,
-  userInSocket
-);
-const { createRoom, joinRoom, deleteRoom, getCurrentRoom } =
-  require('./listeners/roomHandler')(io, socketRoom, userInSocket);
+const { getUserInfo, updateScore, disconnect } =
+  require('./listeners/userHandler')(io, socketRoom, userInSocket);
+const {
+  createRoom,
+  joinRoom,
+  startRoom,
+  leaveRoom,
+  deleteRoom,
+  getCurrentRoom,
+} = require('./listeners/roomHandler')(io, socketRoom, userInSocket);
+const { forwardCoor, playAgain } = require('./listeners/gameHandler')(io);
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
-  socket.on('user:leave', leaveRoom);
-  socket.on('disconnect', disconnect);
+  socket.on('game:forward-coor', forwardCoor);
+  socket.on('game:play-again', playAgain);
 
   socket.on('room:create', createRoom);
   socket.on('room:join', joinRoom);
+  socket.on('room:start', startRoom);
+  socket.on('room:leave', leaveRoom);
   socket.on('room:delete', deleteRoom);
   socket.on('room:current', getCurrentRoom);
+
+  socket.on('user:info', getUserInfo);
+  socket.on('user:update-score', updateScore);
+  socket.on('disconnect', disconnect);
 };
 
 app.get('/', (req, res) => {
