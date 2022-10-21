@@ -7,9 +7,9 @@ module.exports = (io, socketRooms, userInSocket) => {
     io.emit('user:info-done', userInfo);
   };
 
-  const updateScore = function (name) {
+  const updateScore = function () {
     const socket = this;
-    let i = userInSocket.findIndex((x) => x.name == name);
+    let i = userInSocket.findIndex((x) => x.name == socket.name);
     userInSocket[i].score += 1;
     updateUserScore(userInSocket[i]);
     io.emit('user:score-done', userInSocket[i]);
