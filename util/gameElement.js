@@ -5,8 +5,7 @@ class GameElement {
     this.status = 'waiting';
     this.roomId = roomId;
     this.mapDetail = generateMap();
-    this.user = { name: name, role: 'host' };
-    this.role = { prisoner: null, warder: null };
+    this.user = { name: name, role: 'host', isWarder: null };
   }
 
   createMap() {
@@ -14,7 +13,7 @@ class GameElement {
   }
 
   addUser(name) {
-    this.user = { name: name, role: 'member' };
+    this.user = { name: name, role: 'member', isWarder: null };
   }
 
   removeUser(name) {
@@ -23,10 +22,11 @@ class GameElement {
 
   giveRole(name) {
     let index = -1;
-    if (name) index = Math.floor(Math.random() * 2);
+    if (!name) index = Math.floor(Math.random() * 2);
     else index = this.user.findIndex((x) => x.name == name);
-    this.role.warder = this.user[index].name;
-    this.role.prisoner = index == 0 ? this.user[1].name : this.user[0].name;
+    this.user[index].isWarder = false;
+    index = index == 0 ? 1 : 0;
+    this.user[index].isWarder = true;
   }
 }
 

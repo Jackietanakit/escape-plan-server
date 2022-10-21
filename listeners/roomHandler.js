@@ -1,49 +1,68 @@
 const { makeId, userLogin } = require('../util/helper');
 const { GameElement } = require('../util/gameElement');
 
-module.exports = (io, socketRoom, userInSocket) => {
-  const createRoom = function (name, avatarId) {
+module.exports = (io, socketRooms, userInSocket) => {
+  const createRoom = async function (name, avatarId) {
     const socket = this;
-    if (userInSocket.includes(name)) {
+    if (userInSocket.some((userInfo) => userInfo.name == name)) {
       io.emit('user-error', 'user already login');
     } else {
-      userLogin(name, avatarId, userInSocket, socket);
+      // login,add user to userInSocket
+      const userInfo = await userLogin(name, avatarId, userInSocket, socket);
+
+      //Create Room Id that not existed
       let roomId = makeId(6);
+      let roomIds = socketRooms.map((gameEl) => gameEl.roomId);
+      while (roomIds.includes(roomId)) roomId = makeId(6);
+
+      //join to created room
       socket.join(roomId);
       socket.roomId = roomId;
-      let gameElement = new GameElement(roomId, socket.userName);
-      socketRoom.push(gameElement);
-      io.emit('room:create-done', gameElement.roomId, socket.userInfo);
+
+      //Create gameElement and add to socketRooms
+      let gameElement = new GameElement(roomId, userInfo.name);
+      socketRooms.push(gameElement);
+      io.emit('room:create-done', gameElement.roomId, userInfo);
     }
   };
 
-  const joinRoom = function (name, avatarId, roomId) {
+  const joinRoom = async function (name, avatarId, roomId) {
     const socket = this;
-    if (userInSocket.includes(name)) {
+    if (userInSocket.some((userInfo) => userInfo.name == name)) {
       io.emit('user-error', 'user already login');
-    } else if (!socketRoom.find((x) => x.roomId == roomId)) {
+    } else if (!socketRooms.find((x) => x.roomId == roomId)) {
       socket.emit('room-error', 'no such room');
     } else {
-      userLogin(name, avatarId, userInSocket, socket);
+      // login,add user to userInSocket
+      const userInfo = await userLogin(name, avatarId, userInSocket, socket);
+
+      //join existing roomId
       socket.join(roomId);
       socket.roomId = roomId;
 
-      let i = socketRoom.findIndex((x) => x.roomId === roomId);
-      if (socketRoom[i].user.length < 2) socketRoom[i].addUser(name);
-      io.emit('room:join-done', socketRoom[i].user[1].name, socket.userInfo);
+      //Add user to that specific room
+      let i = socketRooms.findIndex((x) => x.roomId === roomId);
+      if (socketRooms[i].user.length < 2) socketRooms[i].addUser(name);
+
+      //Get another member info
+      let host = userInSocket.filter(
+        (x) => x.name == socketRooms[i].user[0].name
+      );
+      io.emit('room:join-done', host, userInfo);
     }
   };
 
   const startRoom = function () {
-    let i = socketRoom.findIndex((x) => x.roomId === socket.roomId);
-    socketRoom[i].status = 'starting';
-    io.emit('room:start-done', socketRoom[i]);
+    let i = socketRooms.findIndex((x) => x.roomId === socket.roomId);
+    socketRooms[i].status = 'starting';
+    socketRooms[i].giveRole(null);
+    io.emit('room:start-done', socketRooms[i]);
   };
 
   const leaveRoom = function () {
     const socket = this;
-    var i = socketRoom.findIndex((x) => x.roomId === roomId);
-    socketRoom[i].removeUser(socket.userInfo.name);
+    var i = socketRooms.findIndex((x) => x.roomId === roomId);
+    socketRooms[i].removeUser(socket.userInfo.name);
     socket.leave(socket.roomId);
     if (socket.roomId) delete socket.roomId;
     console.log(`User [id=${socket.id} leave room [id=${roomId}]]`);
@@ -51,12 +70,12 @@ module.exports = (io, socketRoom, userInSocket) => {
   };
 
   const deleteRoom = function (roomId) {
-    socketRoom = socketRoom.filter((x) => x.roomId != roomId);
-    io.emit('room:delete-done', socketRoom);
+    socketRooms = socketRooms.filter((x) => x.roomId != roomId);
+    io.emit('room:delete-done', socketRooms);
   };
 
   const getCurrentRoom = function () {
-    io.emit('room:current-done', socketRoom);
+    io.emit('room:current-done', socketRooms);
   };
 
   return {

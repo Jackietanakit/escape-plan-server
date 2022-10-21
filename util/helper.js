@@ -21,8 +21,7 @@ const generateMap = () => {
 
 const makeId = (length) => {
   var result = '';
-  var characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var characters = '0123456789';
   var charactersLength = characters.length;
   for (var i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -36,12 +35,13 @@ const userLogin = async (name, avatarId, userInSocket, socket) => {
     userData = { name: name, score: 0 };
     createUser(userData);
   }
-  socket.userInfo = {
+  const userInfo = {
     name: name,
     score: userData.score,
     avatarId: avatarId,
   };
-  userInSocket.push(name);
+  userInSocket.push(userInfo);
+  return userInfo;
 };
 
 module.exports = { generateMap, makeId, userLogin };

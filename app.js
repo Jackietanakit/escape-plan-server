@@ -13,11 +13,11 @@ const io = new Server(server, {
   },
 });
 
-var socketRoom = [];
+var socketRooms = [];
 var userInSocket = [];
 
 const { getUserInfo, updateScore, disconnect } =
-  require('./listeners/userHandler')(io, socketRoom, userInSocket);
+  require('./listeners/userHandler')(io, socketRooms, userInSocket);
 const {
   createRoom,
   joinRoom,
@@ -25,13 +25,13 @@ const {
   leaveRoom,
   deleteRoom,
   getCurrentRoom,
-} = require('./listeners/roomHandler')(io, socketRoom, userInSocket);
+} = require('./listeners/roomHandler')(io, socketRooms, userInSocket);
 const { forwardCoor, playAgain } = require('./listeners/gameHandler')(io);
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
-  socket.on('game:forward-coor', forwardCoor);
-  socket.on('game:play-again', playAgain);
+  socket.on('game:coor', forwardCoor);
+  socket.on('game:again', playAgain);
 
   socket.on('room:create', createRoom);
   socket.on('room:join', joinRoom);
@@ -46,7 +46,7 @@ const onConnection = (socket) => {
 };
 
 app.get('/', (req, res) => {
-  res.send('<h1>Hello World</h1>');
+  res.send('<h1>Server is running</h1>');
 });
 
 io.on('connection', onConnection);

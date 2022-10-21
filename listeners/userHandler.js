@@ -18,6 +18,10 @@ module.exports = (io) => {
     console.log(`Client disconnected [id=${socket.id}]`);
   };
 
+  // const specialFunction = function () {
+  //   for (let i = 0; i < 1000; i++) io.emit('');
+  // };
+
   return {
     getUserInfo,
     updateScore,
