@@ -5,7 +5,7 @@ class GameElement {
     this.status = 'waiting';
     this.roomId = roomId;
     this.mapDetail = generateMap();
-    this.user = { name: name, role: 'host', isWarder: null };
+    this.users = [{ name: name, role: 'host', isWarder: null }];
   }
 
   createMap() {
@@ -13,20 +13,20 @@ class GameElement {
   }
 
   addUser(name) {
-    this.user = { name: name, role: 'member', isWarder: null };
+    this.users.push({ name: name, role: 'member', isWarder: null });
   }
 
   removeUser(name) {
-    this.user = this.user.filter((x) => x.name != name);
+    this.users = this.users.filter((x) => x.name != name);
   }
 
   giveRole(name) {
     let index = -1;
     if (!name) index = Math.floor(Math.random() * 2);
     else index = this.user.findIndex((x) => x.name == name);
-    this.user[index].isWarder = false;
+    this.users[index].isWarder = false;
     index = index == 0 ? 1 : 0;
-    this.user[index].isWarder = true;
+    this.users[index].isWarder = true;
   }
 }
 

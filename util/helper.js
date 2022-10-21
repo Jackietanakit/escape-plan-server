@@ -35,6 +35,7 @@ const userLogin = async (name, avatarId, userInSocket, socket) => {
     userData = { name: name, score: 0 };
     createUser(userData);
   }
+  socket.name = name;
   const userInfo = {
     name: name,
     score: userData.score,

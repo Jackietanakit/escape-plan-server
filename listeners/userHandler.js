@@ -1,20 +1,23 @@
 const { updateUserScore } = require('../schema/user');
 
-module.exports = (io) => {
-  const getUserInfo = function () {
+module.exports = (io, socketRooms, userInSocket) => {
+  const getUserInfo = function (name) {
     const socket = this;
-    io.emit('user:info-done', socket.userInfo);
+    let userInfo = userInSocket.find((x) => x.name == name);
+    io.emit('user:info-done', userInfo);
   };
 
-  const updateScore = function () {
+  const updateScore = function (name) {
     const socket = this;
-    socket.userInfo.score += 1;
-    updateUserScore(socket.userInfo);
-    io.emit('user:score-done', socket.userInfo);
+    let i = userInSocket.findIndex((x) => x.name == name);
+    userInSocket[i].score += 1;
+    updateUserScore(userInSocket[i]);
+    io.emit('user:score-done', userInSocket[i]);
   };
 
   const disconnect = function () {
     const socket = this;
+    userInSocket = userInSocket.filter((x) => x.name != socket.name);
     console.log(`Client disconnected [id=${socket.id}]`);
   };
 

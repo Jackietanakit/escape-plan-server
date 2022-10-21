@@ -15,6 +15,9 @@ module.exports = (io, socketRooms, userInSocket) => {
       let roomIds = socketRooms.map((gameEl) => gameEl.roomId);
       while (roomIds.includes(roomId)) roomId = makeId(6);
 
+      // //For develop process
+      // roomId = '111111';
+
       //join to created room
       socket.join(roomId);
       socket.roomId = roomId;
@@ -42,17 +45,18 @@ module.exports = (io, socketRooms, userInSocket) => {
 
       //Add user to that specific room
       let i = socketRooms.findIndex((x) => x.roomId === roomId);
-      if (socketRooms[i].user.length < 2) socketRooms[i].addUser(name);
+      if (socketRooms[i].users.length < 2) socketRooms[i].addUser(name);
 
       //Get another member info
-      let host = userInSocket.filter(
-        (x) => x.name == socketRooms[i].user[0].name
+      let hostInfo = userInSocket.find(
+        (x) => x.name == socketRooms[i].users[0].name
       );
-      io.emit('room:join-done', host, userInfo);
+      io.emit('room:join-done', hostInfo, userInfo);
     }
   };
 
   const startRoom = function () {
+    const socket = this;
     let i = socketRooms.findIndex((x) => x.roomId === socket.roomId);
     socketRooms[i].status = 'starting';
     socketRooms[i].giveRole(null);

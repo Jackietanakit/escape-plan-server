@@ -6,8 +6,9 @@ const createUser = async (userData) => {
   await dbo
     .collection('users')
     .insertOne(userData)
-    .then(() => {});
-  console.log(`Added on username: ${userData.name}`);
+    .then((res) => {
+      console.log(`Added username on database: ${userData.name}`);
+    });
 };
 
 const findUser = async (name) => {
@@ -17,10 +18,7 @@ const findUser = async (name) => {
 const updateUserScore = async (userData) => {
   return await dbo
     .collection('users')
-    .updateOne(
-      { name: userData.name },
-      { $set: { score: userData.score + 1 } }
-    );
+    .updateOne({ name: userData.name }, { $set: { score: userData.score } });
 };
 
 module.exports = { createUser, findUser, updateUserScore };
