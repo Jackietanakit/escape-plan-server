@@ -15,8 +15,9 @@ const io = new Server(server, {
 
 var socketRooms = [];
 var userInSocket = [];
+var gameElements = [];
 
-const { getUserInfo, updateScore, disconnect } =
+const { userLogin, getUserInfo, updateScore, disconnect } =
   require('./listeners/userHandler')(io, socketRooms, userInSocket);
 const {
   createRoom,
@@ -25,13 +26,20 @@ const {
   leaveRoom,
   deleteRoom,
   getCurrentRoom,
-} = require('./listeners/roomHandler')(io, socketRooms, userInSocket);
-const { forwardCoor, playAgain } = require('./listeners/gameHandler')(io);
+} = require('./listeners/roomHandler')(
+  io,
+  socketRooms,
+  userInSocket,
+  gameElements
+);
+const { updateCoor, playAgain } = require('./listeners/gameHandler')(io);
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
-  socket.on('game:coor', forwardCoor);
-  socket.on('game:again', playAgain);
+  socket.on('user:login', userLogin);
+  socket.on('user:info', getUserInfo);
+  socket.on('user:update-score', updateScore);
+  socket.on('disconnect', disconnect);
 
   socket.on('room:create', createRoom);
   socket.on('room:join', joinRoom);
@@ -40,9 +48,8 @@ const onConnection = (socket) => {
   socket.on('room:delete', deleteRoom);
   socket.on('room:current', getCurrentRoom);
 
-  socket.on('user:info', getUserInfo);
-  socket.on('user:update-score', updateScore);
-  socket.on('disconnect', disconnect);
+  socket.on('game:update', updateCoor);
+  socket.on('game:again', playAgain);
 };
 
 app.get('/', (req, res) => {

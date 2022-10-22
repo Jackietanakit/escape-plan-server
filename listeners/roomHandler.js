@@ -1,76 +1,68 @@
-const { makeId, userLogin } = require('../util/helper');
+const { makeId } = require('../util/helper');
 const { GameElement } = require('../util/gameElement');
+const { RoomDetail } = require('../util/roomDetail');
 
-module.exports = (io, socketRooms, userInSocket) => {
-  const createRoom = async function (name, avatarId) {
+module.exports = (io, roomInSocket, userInSocket, gameElements) => {
+  const createRoom = function () {
     const socket = this;
-    if (userInSocket.some((userInfo) => userInfo.name == name)) {
-      io.emit('user-error', 'user already login');
+    if (!socket.userInfo) {
+      socket.emit('user-error', 'User is not login');
     } else {
-      // login,add user to userInSocket
-      const userInfo = await userLogin(name, avatarId, userInSocket, socket);
-
-      //Create Room Id that not existed
+      // Generate RoomId
       let roomId = makeId(6);
-      let roomIds = socketRooms.map((gameEl) => gameEl.roomId);
+      let roomIds = roomInSocket.map((gameEl) => gameEl.roomId);
       while (roomIds.includes(roomId)) roomId = makeId(6);
 
-      // //For develop process
-      // roomId = '111111';
+      // Create room
+      roomId = '111111';
+      let roomDetail = new RoomDetail(roomId);
+      roomDetail.addHost(socket.userInfo);
+      roomInSocket.push(roomDetail);
 
       //join to created room
       socket.join(roomId);
-      socket.roomId = roomId;
+      console.log(socket.rooms);
 
-      //Create gameElement and add to socketRooms
-      let gameElement = new GameElement(roomId, userInfo.name);
-      socketRooms.push(gameElement);
-      io.emit('room:create-done', gameElement.roomId, userInfo);
+      io.in(roomId).emit('room:create-done', roomDetail);
     }
   };
 
-  const joinRoom = async function (name, avatarId, roomId) {
+  const joinRoom = function (roomId) {
     const socket = this;
-    if (userInSocket.some((userInfo) => userInfo.name == name)) {
-      io.emit('user-error', 'user already login');
-    } else if (!socketRooms.find((x) => x.roomId == roomId)) {
-      socket.emit('room-error', 'no such room');
+    if (!socket.userInfo) {
+      socket.emit('user-error', 'User is not login');
+    } else if (!roomInSocket.find((x) => x.id == roomId)) {
+      socket.emit('room-error', `${roomId} doesn't exist`);
     } else {
-      // login,add user to userInSocket
-      const userInfo = await userLogin(name, avatarId, userInSocket, socket);
-
       //join existing roomId
       socket.join(roomId);
       socket.roomId = roomId;
 
       //Add user to that specific room
-      let i = socketRooms.findIndex((x) => x.roomId === roomId);
-      if (socketRooms[i].users.length < 2) socketRooms[i].addUser(name);
+      let i = roomInSocket.findIndex((x) => x.id === roomId);
+      if (roomInSocket[i].users.length < 2)
+        roomInSocket[i].addMember(socket.userInfo);
 
-      //Get another member info
-      let hostInfo = userInSocket.find(
-        (x) => x.name == socketRooms[i].users[0].name
-      );
-      io.emit('room:join-done', hostInfo, userInfo);
+      io.in(roomId).emit('room:join-done', roomInSocket[i]);
     }
   };
 
-  const startRoom = function () {
+  const startRoom = function (hostName, memberName) {
     const socket = this;
-    // Change state of status
-    let i = socketRooms.findIndex((x) => x.roomId === socket.roomId);
-    socketRooms[i].status = 'starting';
+    let gameEl = new GameElement(hostName);
+    gameEl.addUser(memberName);
 
     //generate role for player
-    socketRooms[i].giveRole(null);
+    gameEl.giveRole(null);
+    gameElements.push(gameEl);
 
-    io.emit('room:start-done', socketRooms[i]);
+    io.emit('room:start-done', gameEl);
   };
 
   const leaveRoom = function () {
     const socket = this;
-    var i = socketRooms.findIndex((x) => x.roomId === roomId);
-    socketRooms[i].removeUser(socket.userInfo.name);
+    var i = roomInSocket.findIndex((x) => x.roomId === roomId);
+    roomInSocket[i].removeUser(socket.userInfo.name);
     socket.leave(socket.roomId);
     if (socket.roomId) delete socket.roomId;
     console.log(`User [id=${socket.id} leave room [id=${roomId}]]`);
@@ -78,8 +70,8 @@ module.exports = (io, socketRooms, userInSocket) => {
   };
 
   const deleteRoom = function (roomId) {
-    socketRooms = socketRooms.filter((x) => x.roomId != roomId);
-    io.emit('room:delete-done', socketRooms);
+    roomInSocket = roomInSocket.filter((x) => x.roomId != roomId);
+    io.emit('room:delete-done', roomInSocket);
   };
 
   const getCurrentRoom = function () {

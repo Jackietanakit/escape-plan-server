@@ -1,5 +1,3 @@
-const { createUser, findUser } = require('../schema/user');
-
 const generateMap = () => {
   let map = [
     [0, 0, 0, 0, 'h'],
@@ -29,20 +27,4 @@ const makeId = (length) => {
   return result;
 };
 
-const userLogin = async (name, avatarId, userInSocket, socket) => {
-  var userData = await findUser(name);
-  if (userData == null) {
-    userData = { name: name, score: 0 };
-    createUser(userData);
-  }
-  socket.name = name;
-  const userInfo = {
-    name: name,
-    score: userData.score,
-    avatarId: avatarId,
-  };
-  userInSocket.push(userInfo);
-  return userInfo;
-};
-
-module.exports = { generateMap, makeId, userLogin };
+module.exports = { generateMap, makeId };

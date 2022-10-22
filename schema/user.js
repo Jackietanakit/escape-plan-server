@@ -15,10 +15,16 @@ const findUser = async (name) => {
   return await dbo.collection('users').findOne({ name: name });
 };
 
-const updateUserScore = async (userData) => {
+const updateUserData = async (userData) => {
   return await dbo
     .collection('users')
-    .updateOne({ name: userData.name }, { $set: { score: userData.score } });
+    .updateOne(
+      { name: userData.name },
+      { $set: { score: userData.score, avatarId: userData.avatarId } }
+    )
+    .then((res) => {
+      console.log(`${userData.name} change score to ${userData.score}`);
+    });
 };
 
-module.exports = { createUser, findUser, updateUserScore };
+module.exports = { createUser, findUser, updateUserData };
