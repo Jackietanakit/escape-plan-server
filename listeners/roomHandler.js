@@ -57,9 +57,13 @@ module.exports = (io, socketRooms, userInSocket) => {
 
   const startRoom = function () {
     const socket = this;
+    // Change state of status
     let i = socketRooms.findIndex((x) => x.roomId === socket.roomId);
     socketRooms[i].status = 'starting';
+
+    //generate role for player
     socketRooms[i].giveRole(null);
+
     io.emit('room:start-done', socketRooms[i]);
   };
 

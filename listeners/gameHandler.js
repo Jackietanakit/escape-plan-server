@@ -1,11 +1,18 @@
 const { updateScore } = require('../listeners/userHandler');
 
 module.exports = (io, socketRooms) => {
-  const forwardCoor = function (coor, role) {
-    io.emit('game:coor-done', coor, role);
-  };
+  // const updateCoor = function (coor, isWarder) {
+  //   let i = socketRooms.findIndex((x) => x.roomId === socket.roomId);
+  //   let mapDetail = socketRooms[i].mapDetail;
+  //   if (isWarder) {
+  //     mapDetail.map[mapDetail.wCoor];
+  //   }
+
+  //   io.emit('game:coor-done', coor, isWarder);
+  // };
 
   const playAgain = function (name) {
+    // generate new map and give user role
     let i = socketRooms.findIndex((x) => x.roomId === socket.roomId);
     socketRooms[i].createMap();
     socketRooms[i].giveRole(name);
@@ -13,7 +20,7 @@ module.exports = (io, socketRooms) => {
   };
 
   return {
-    forwardCoor,
+    updateCoor,
     playAgain,
   };
 };

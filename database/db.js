@@ -9,7 +9,7 @@ async function run() {
   await client.connect();
   // Establish and verify connection
   await client.db('admin').command({ ping: 1 });
-  console.log('Connected successfully to server');
+  console.log('Connected successfully to database');
 }
 run().catch(console.dir);
 
