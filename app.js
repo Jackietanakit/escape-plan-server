@@ -17,7 +17,7 @@ var socketRooms = [];
 var userInSocket = [];
 var gameElements = [];
 
-const { userLogin, getUserInfo, updateScore, disconnect } =
+const { userLogin, getUserInfo, getAllUser, updateScore, disconnect } =
   require('./listeners/userHandler')(io, socketRooms, userInSocket);
 const {
   createRoom,
@@ -38,6 +38,7 @@ const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
   socket.on('user:login', userLogin);
   socket.on('user:info', getUserInfo);
+  socket.on('user:get-all', getAllUser);
   socket.on('user:update-score', updateScore);
   socket.on('disconnect', disconnect);
 

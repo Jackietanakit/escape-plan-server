@@ -36,6 +36,15 @@ module.exports = (io, socketRooms, userInSocket) => {
     }
   };
 
+  const getAllUser = function () {
+    try {
+      const socket = this;
+      socket.emit('user:get-all-done', userInSocket);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const updateScore = function (name) {
     try {
       const socket = this;
@@ -52,7 +61,8 @@ module.exports = (io, socketRooms, userInSocket) => {
   const disconnect = function () {
     try {
       const socket = this;
-      // userInSocket = userInSocket.filter((x) => x.name != socket.userInfo.name);
+      if (socket.userInfo)
+        userInSocket = userInSocket.filter((x) => x != socket.userInfo.name);
       console.log(`Client disconnected [id=${socket.id}]`);
     } catch (error) {
       console.error(error);
@@ -66,6 +76,7 @@ module.exports = (io, socketRooms, userInSocket) => {
   return {
     userLogin,
     getUserInfo,
+    getAllUser,
     updateScore,
     disconnect,
   };
