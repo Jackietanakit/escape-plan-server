@@ -19,6 +19,7 @@ class RoomDetail {
 
   removeUser(name) {
     this.users = this.users.filter((x) => x.name != name);
+    if (this.users.length == 1) this.users[0].isHost = true;
   }
 }
 

@@ -89,6 +89,8 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
       let i = roomInSocket.findIndex((x) => x.id === socket.roomId);
       roomInSocket[i].removeUser(socket.userInfo.name);
 
+      if (roomInSocket[i].users.length === 0) roomInSocket.splice(i, 1);
+
       // leave room in socket
       socket.leave(socket.roomId);
       console.log(`User [id=${socket.id} leave room [id=${socket.roomId}]]`);
@@ -110,7 +112,17 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
 
   const getCurrentRoom = function () {
     try {
-      io.emit('room:current-done', roomInSocket);
+      const socket = this;
+      let room = roomInSocket.find((x) => x.id === socket.roomId);
+      io.emit('room:current-done', room);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getAllRoom = function () {
+    try {
+      io.emit('room:all-done', roomInSocket);
     } catch (error) {
       console.error(error);
     }
@@ -124,5 +136,6 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     leaveRoom,
     deleteRoom,
     getCurrentRoom,
+    getAllRoom,
   };
 };

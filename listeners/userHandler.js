@@ -39,8 +39,6 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
   const getAllUser = function () {
     try {
       const socket = this;
-      let name = 'jackie';
-      console.log(roomInSocket[0].find((x) => x.name === name));
       socket.emit('user:get-all-done', userInSocket);
     } catch (error) {
       console.error(error);

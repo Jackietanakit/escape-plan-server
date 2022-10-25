@@ -32,6 +32,7 @@ const {
   leaveRoom,
   deleteRoom,
   getCurrentRoom,
+  getAllRoom,
 } = require('./listeners/roomHandler')(
   io,
   roomInSocket,
@@ -59,6 +60,7 @@ const onConnection = (socket) => {
   socket.on('room:leave', leaveRoom);
   socket.on('room:delete', deleteRoom);
   socket.on('room:current', getCurrentRoom);
+  socket.on('room:all', getAllRoom);
 
   socket.on('game:update', updateCoor);
 };
