@@ -1,10 +1,10 @@
-const { createUser, findUser, updateUserScore } = require('../schema/user');
+const { createUser, findUser } = require('../schema/user');
 
 module.exports = (io, socketRooms, userInSocket) => {
   const userLogin = async function (name, avatarId) {
     try {
       const socket = this;
-      if (userInSocket.includes(name))
+      if (userInSocket.find((x) => x.name == name))
         socket.emit('user-error', `Username: ${name} is already login`);
       else {
         var userData = await findUser(name);
@@ -18,7 +18,7 @@ module.exports = (io, socketRooms, userInSocket) => {
           avatarId: avatarId,
         };
         socket.userInfo = userInfo;
-        userInSocket.push(socket.userInfo.name);
+        userInSocket.push({ name: name, socketId: socket.id });
         socket.emit('user:login-done', socket.userInfo);
       }
     } catch (error) {

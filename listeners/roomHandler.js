@@ -15,14 +15,13 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
         while (roomIds.includes(roomId)) roomId = makeId(6);
 
         // Create room
-        roomId = '111111';
+        // roomId = '111111';
         let roomDetail = new RoomDetail(roomId);
         roomDetail.addHost(socket.userInfo);
         roomInSocket.push(roomDetail);
 
         //join to created room
         socket.join(roomId);
-        console.log(socket.rooms);
 
         io.in(roomId).emit('room:create-done', roomDetail);
       }
@@ -35,18 +34,18 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     try {
       const socket = this;
       if (!socket.userInfo) {
-        socket.emit('user-error', 'User is not login');
+        socket.emit('user:error', 'User is not login');
       } else if (!roomInSocket.find((x) => x.id == roomId)) {
-        socket.emit('room-error', `${roomId} doesn't exist`);
+        socket.emit('room:error', `${roomId} doesn't exist`);
       } else {
         //join existing roomId
         socket.join(roomId);
-        socket.roomId = roomId;
 
         //Add user to that specific room
         let i = roomInSocket.findIndex((x) => x.id === roomId);
         if (roomInSocket[i].users.length < 2)
           roomInSocket[i].addMember(socket.userInfo);
+        else socket.emit('room:error', `Room id: ${roomId} is already full`);
 
         io.in(roomId).emit('room:join-done', roomInSocket[i]);
       }
@@ -58,11 +57,9 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
   const startRoom = function (hostName, memberName) {
     try {
       const socket = this;
+      // Create Boardgame
       let gameEl = new GameElement(hostName);
-      io.emit('room:start-done', gameEl);
       gameEl.addUser(memberName);
-
-      io.emit('room:start-done', gameEl);
 
       //generate role for player
       gameEl.giveRole(null);
@@ -74,15 +71,20 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     }
   };
 
-  const leaveRoom = function () {
+  const leaveRoom = function (roomId) {
     try {
       const socket = this;
-      var i = roomInSocket.findIndex((x) => x.roomId === roomId);
+      let roomId = [...socket.rooms][1];
+
+      // Leave roomDetail
+      let i = roomInSocket.findIndex((x) => x.roomId === roomId);
       roomInSocket[i].removeUser(socket.userInfo.name);
-      socket.leave(socket.roomId);
-      if (socket.roomId) delete socket.roomId;
+
+      // leave room in socket
+      socket.leave(roomId);
       console.log(`User [id=${socket.id} leave room [id=${roomId}]]`);
-      io.emit('user:leave-done', socket.userInfo);
+
+      io.emit('user:leave-done', roomInSocket[i]);
     } catch (error) {
       console.error(error);
     }

@@ -23,6 +23,10 @@ class RoomDetail {
     };
     this.users.push(memberInfo);
   }
+
+  removeUser(name) {
+    this.users = this.users.filter((x) => x.name != name);
+  }
 }
 
 module.exports = { RoomDetail };
