@@ -55,6 +55,14 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     }
   };
 
+  const startSignal = function () {
+    try {
+      io.in(socket.roomId).emit('room:starting-done', 'kuay');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const startRoom = function (hostName, memberName) {
     try {
       const socket = this;
@@ -109,6 +117,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
   return {
     createRoom,
     joinRoom,
+    startSignal,
     startRoom,
     leaveRoom,
     deleteRoom,

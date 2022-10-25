@@ -27,6 +27,7 @@ const { userLogin, getUserInfo, getAllUser, updateScore, disconnect } =
 const {
   createRoom,
   joinRoom,
+  startSignal,
   startRoom,
   leaveRoom,
   deleteRoom,
@@ -53,6 +54,7 @@ const onConnection = (socket) => {
 
   socket.on('room:create', createRoom);
   socket.on('room:join', joinRoom);
+  socket.on('room:starting', startSignal);
   socket.on('room:start', startRoom);
   socket.on('room:leave', leaveRoom);
   socket.on('room:delete', deleteRoom);
