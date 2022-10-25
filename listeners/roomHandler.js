@@ -7,7 +7,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     try {
       const socket = this;
       if (!socket.userInfo) {
-        socket.emit('user-error', 'User is not login');
+        socket.emit('user:error', 'User is not login');
       } else {
         // Generate RoomId
         let roomId = makeId(6);
@@ -15,13 +15,15 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
         while (roomIds.includes(roomId)) roomId = makeId(6);
 
         // Create room
-        // roomId = '111111';
+
+        roomId = '111111';
         let roomDetail = new RoomDetail(roomId);
         roomDetail.addHost(socket.userInfo);
         roomInSocket.push(roomDetail);
 
         //join to created room
         socket.join(roomId);
+        socket.roomId = roomId;
 
         io.in(roomId).emit('room:create-done', roomDetail);
       }
@@ -40,6 +42,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
       } else {
         //join existing roomId
         socket.join(roomId);
+        socket.roomId = roomId;
 
         //Add user to that specific room
         let i = roomInSocket.findIndex((x) => x.id === roomId);
@@ -58,8 +61,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     try {
       const socket = this;
       // Create Boardgame
-      let gameEl = new GameElement(hostName);
-      gameEl.addUser(memberName);
+      let gameEl = new GameElement(hostName, memberName, socket.roomId);
 
       //generate role for player
       gameEl.giveRole(null);
@@ -71,20 +73,19 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     }
   };
 
-  const leaveRoom = function (roomId) {
+  const leaveRoom = function () {
     try {
       const socket = this;
-      let roomId = [...socket.rooms][1];
 
       // Leave roomDetail
-      let i = roomInSocket.findIndex((x) => x.roomId === roomId);
+      let i = roomInSocket.findIndex((x) => x.id === socket.roomId);
       roomInSocket[i].removeUser(socket.userInfo.name);
 
       // leave room in socket
-      socket.leave(roomId);
-      console.log(`User [id=${socket.id} leave room [id=${roomId}]]`);
+      socket.leave(socket.roomId);
+      console.log(`User [id=${socket.id} leave room [id=${socket.roomId}]]`);
 
-      io.emit('user:leave-done', roomInSocket[i]);
+      io.emit('room:leave-done', roomInSocket[i]);
     } catch (error) {
       console.error(error);
     }
@@ -101,7 +102,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
 
   const getCurrentRoom = function () {
     try {
-      io.emit('room:current-done', socketRooms);
+      io.emit('room:current-done', roomInSocket);
     } catch (error) {
       console.error(error);
     }

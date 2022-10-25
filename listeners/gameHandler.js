@@ -1,27 +1,41 @@
-const { updateScore } = require('../listeners/userHandler');
-
-module.exports = (io, socketRooms) => {
-  const updateCoor = function (coor, isWarder) {
+module.exports = (io, roomInSocket, gameElements) => {
+  const updateCoor = function (coor, isWarderTurn) {
     try {
-      let i = socketRooms.findIndex((x) => x.roomId === socket.roomId);
-      let mapDetail = socketRooms[i].mapDetail;
-      if (isWarder) {
-        mapDetail.map[mapDetail.wCoor];
+      console.log('updateCoor');
+      const socket = this;
+      if (!coor) socket.emit('game:error', 'No Param');
+      else {
+        let i = gameElements.findIndex((x) => x.roomId === socket.roomId);
+
+        let mapDetail = gameElements[i].mapDetail;
+        if (isWarderTurn) {
+          if (coor === mapDetail.pCoor)
+            io.emit('game:update-done', 'Warder win!');
+          else {
+            mapDetail.map[coor[0]][coor[1]] = 'w';
+            mapDetail.map[mapDetail.wCoor[0]][mapDetail.wCoor[1]] = 0;
+            mapDetail.wCoor = coor;
+          }
+        } else {
+          if (coor === mapDetail.hCoor)
+            io.emit('game:update-done', 'Prisoner win!');
+          else if (coor === mapDetail.wCoor)
+            io.emit('game:update-done', 'Warder win!');
+          else {
+            mapDetail.map[coor[0]][coor[1]] = 'p';
+            mapDetail.map[mapDetail.pCoor[0]][mapDetail.pCoor[1]] = 0;
+            mapDetail.wCoor = coor;
+          }
+          io;
+        }
+        gameElements[i].mapDetail = mapDetail;
+        if (isWarderTurn) isWarderTurn = false;
+        else isWarderTurn = true;
+        io.emit('game:update-done', {
+          ...mapDetail,
+          isWarderTurn,
+        });
       }
-
-      io.emit('game:coor-done', coor, isWarder);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const playAgain = function (name) {
-    try {
-      // generate new map and give user role
-      let i = socketRooms.findIndex((x) => x.roomId === socket.roomId);
-      socketRooms[i].createMap();
-      socketRooms[i].giveRole(name);
-      io.emit('game:again-done', socketRooms[i]);
     } catch (error) {
       console.error(error);
     }
@@ -29,6 +43,5 @@ module.exports = (io, socketRooms) => {
 
   return {
     updateCoor,
-    playAgain,
   };
 };

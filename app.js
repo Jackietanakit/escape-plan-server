@@ -13,12 +13,17 @@ const io = new Server(server, {
   },
 });
 
-var socketRooms = [];
+var roomInSocket = [];
 var userInSocket = [];
 var gameElements = [];
 
 const { userLogin, getUserInfo, getAllUser, updateScore, disconnect } =
-  require('./listeners/userHandler')(io, socketRooms, userInSocket);
+  require('./listeners/userHandler')(
+    io,
+    roomInSocket,
+    userInSocket,
+    gameElements
+  );
 const {
   createRoom,
   joinRoom,
@@ -28,11 +33,15 @@ const {
   getCurrentRoom,
 } = require('./listeners/roomHandler')(
   io,
-  socketRooms,
+  roomInSocket,
   userInSocket,
   gameElements
 );
-const { updateCoor, playAgain } = require('./listeners/gameHandler')(io);
+const { updateCoor } = require('./listeners/gameHandler')(
+  io,
+  roomInSocket,
+  gameElements
+);
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
@@ -50,7 +59,6 @@ const onConnection = (socket) => {
   socket.on('room:current', getCurrentRoom);
 
   socket.on('game:update', updateCoor);
-  socket.on('game:again', playAgain);
 };
 
 app.get('/', (req, res) => {

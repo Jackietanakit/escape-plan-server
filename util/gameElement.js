@@ -1,10 +1,14 @@
 const { generateMap } = require('./helper');
 
 class GameElement {
-  constructor(name) {
+  constructor(hostName, memberName, roomId) {
+    this.roomId = roomId;
     this.status = 'playing';
     this.mapDetail = generateMap();
-    this.users = [{ name: name, isWarder: null }];
+    this.users = [
+      { name: hostName, isWarder: null },
+      { name: memberName, isWarder: null },
+    ];
   }
 
   createMap() {
@@ -28,6 +32,9 @@ class GameElement {
     this.users[index].isWarder = true;
     index = index == 0 ? 1 : 0;
     this.users[index].isWarder = false;
+
+    this.users[0].isWarder = true;
+    this.users[1].isWarder = false;
   }
 }
 
