@@ -41,7 +41,17 @@ module.exports = (io, roomInSocket, gameElements) => {
     }
   };
 
+  const getAllGameElement = function () {
+    try {
+      const socket = this;
+      socket.emit('game:all-done', gameElements);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return {
     updateCoor,
+    getAllGameElement,
   };
 };

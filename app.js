@@ -17,7 +17,7 @@ var roomInSocket = [];
 var userInSocket = [];
 var gameElements = [];
 
-const { userLogin, getUserInfo, getAllUser, updateScore, disconnect } =
+const { userLogin, getUserInfo, getAllUser, updateScore, disconnect, test } =
   require('./listeners/userHandler')(
     io,
     roomInSocket,
@@ -39,7 +39,7 @@ const {
   userInSocket,
   gameElements
 );
-const { updateCoor } = require('./listeners/gameHandler')(
+const { updateCoor, getAllGameElement } = require('./listeners/gameHandler')(
   io,
   roomInSocket,
   gameElements
@@ -63,6 +63,8 @@ const onConnection = (socket) => {
   socket.on('room:all', getAllRoom);
 
   socket.on('game:update', updateCoor);
+  socket.on('game:all', getAllGameElement);
+  socket.on('test', test);
 };
 
 app.get('/', (req, res) => {

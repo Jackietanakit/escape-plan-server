@@ -62,14 +62,13 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     try {
       const socket = this;
       let i = userInSocket.findIndex((x) => x.socketId === socket.id);
-      console.log(i);
       if (i >= 0) {
         let name = userInSocket[i].name;
-        let gameIndex = gameElements.findIndex((el) =>
-          el.users.filter((user) => user.name === name)
+        let gameIndex = gameElements.findIndex(
+          (el) => el.users.filter((user) => user.name === name)[0]
         );
-        let roomIndex = roomInSocket.findIndex((el) =>
-          el.users.filter((user) => user.name === name)
+        let roomIndex = roomInSocket.findIndex(
+          (el) => el.users.filter((user) => user.name === name)[0]
         );
         userInSocket = userInSocket.splice(i, 1);
         if (gameIndex >= 0) {
@@ -80,14 +79,18 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
         }
       }
       console.log(`Client disconnected [id=${socket.id}]`);
+      io.emit('test-done');
     } catch (error) {
       console.error(error);
     }
   };
 
-  // const specialFunction = function () {
-  //   for (let i = 0; i < 1000; i++) io.emit('');
-  // };
+  const test = function () {
+    try {
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return {
     userLogin,
@@ -95,5 +98,6 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     getAllUser,
     updateScore,
     disconnect,
+    test,
   };
 };

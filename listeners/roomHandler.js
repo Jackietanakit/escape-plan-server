@@ -84,18 +84,19 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
   const leaveRoom = function () {
     try {
       const socket = this;
+      let roomId = socket.roomId;
 
       // Leave roomDetail
-      let i = roomInSocket.findIndex((x) => x.id === socket.roomId);
+      let i = roomInSocket.findIndex((x) => x.id === roomId);
       roomInSocket[i].removeUser(socket.userInfo.name);
 
       if (roomInSocket[i].users.length === 0) roomInSocket.splice(i, 1);
 
       // leave room in socket
-      socket.leave(socket.roomId);
-      console.log(`User [id=${socket.id} leave room [id=${socket.roomId}]]`);
+      socket.leave(roomId);
+      console.log(`User [id=${socket.id} leave room [id=${roomId}]]`);
 
-      io.emit('room:leave-done', roomInSocket[i]);
+      io.in(roomId).emit('room:leave-done', roomInSocket[i]);
     } catch (error) {
       console.error(error);
     }
