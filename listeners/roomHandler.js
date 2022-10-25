@@ -15,6 +15,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
         while (roomIds.includes(roomId)) roomId = makeId(6);
 
         // Create room
+        roomId = '111111';
         let roomDetail = new RoomDetail(roomId);
         roomDetail.addHost(socket.userInfo);
         roomInSocket.push(roomDetail);
@@ -57,6 +58,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
 
   const startSignal = function () {
     try {
+      const socket = this;
       io.in(socket.roomId).emit('room:starting-done', 'kuay');
     } catch (error) {
       console.log(error);

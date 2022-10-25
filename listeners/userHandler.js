@@ -78,7 +78,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
           gameElements[gameIndex].removeUser(name);
         }
         if (roomIndex >= 0) {
-          gameElements[gameIndex].removeUser(name);
+          roomInSocket[roomIndex].removeUser(name);
         }
       }
       console.log(`Client disconnected [id=${socket.id}]`);
