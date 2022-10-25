@@ -15,8 +15,6 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
         while (roomIds.includes(roomId)) roomId = makeId(6);
 
         // Create room
-
-        roomId = '111111';
         let roomDetail = new RoomDetail(roomId);
         roomDetail.addHost(socket.userInfo);
         roomInSocket.push(roomDetail);
