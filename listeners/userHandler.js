@@ -64,7 +64,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     try {
       const socket = this;
       let i = userInSocket.findIndex((x) => x.socketId === socket.id);
-
+      console.log(i);
       if (i >= 0) {
         let name = userInSocket[i].name;
         let gameIndex = gameElements.findIndex((el) =>
