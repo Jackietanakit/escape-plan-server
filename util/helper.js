@@ -1,13 +1,13 @@
 const generateMap = () => {
   let map = [
-    [0, 0, 0, 0, 'h'],
-    ['p', 1, 0, 0, 0],
+    [0, 0, 0, 'p', 'h'],
+    [0, 1, 0, 'w', 0],
     [1, 1, 1, 0, 0],
-    [0, 0, 1, 0, 'w'],
+    [0, 0, 1, 0, 0],
     [0, 0, 0, 0, 0],
   ];
-  let pCoor = [1, 0];
-  let wCoor = [3, 4];
+  let pCoor = [0, 3];
+  let wCoor = [1, 3];
   let hCoor = [0, 4];
   return {
     map: map,
@@ -27,4 +27,15 @@ const makeId = (length) => {
   return result;
 };
 
-module.exports = { generateMap, makeId };
+function arraysEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length !== b.length) return false;
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+module.exports = { generateMap, makeId, arraysEqual };

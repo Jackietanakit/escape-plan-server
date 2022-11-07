@@ -1,4 +1,4 @@
-const { createUser, findUser } = require('../schema/user');
+const { createUser, findUser, updateUserData } = require('../schema/user');
 
 module.exports = (io, roomInSocket, userInSocket, gameElements) => {
   const userLogin = async function (name, avatarId) {
@@ -7,11 +7,20 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
       if (userInSocket.find((x) => x.name == name))
         socket.emit('user:error', `Username: ${name} is already login`);
       else {
+        // Find existing user in database
         var userData = await findUser(name);
         if (userData == null) {
-          userData = { name: name, score: 0 };
+          userData = { name: name, score: 0, avatarId: avatarId };
           createUser(userData);
         }
+
+        // Update user avatar
+        if (userData.avatarId != avatarId) {
+          userData.avatarId = avatarId;
+          updateUserData(userData);
+        }
+
+        // Add user to socket
         const userInfo = {
           name: name,
           score: userData.score,
@@ -19,6 +28,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
         };
         socket.userInfo = userInfo;
         userInSocket.push({ name: name, socketId: socket.id });
+
         socket.emit('user:login-done', socket.userInfo);
       }
     } catch (error) {
@@ -45,13 +55,13 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     }
   };
 
-  const updateScore = function (name) {
+  const updateScore = function () {
     try {
       const socket = this;
       if (socket.userInfo) {
         socket.userInfo.score += 1;
         updateUserScore(socket.userInfo);
-        socket.emit('user:score-done', userInSocket[i]);
+        io.in(socket.roomId).emit('user:score-done', socket.userInfo);
       } else socket.emit('user:error', 'User is not login');
     } catch (error) {
       console.error(error);
@@ -70,16 +80,17 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
         let roomIndex = roomInSocket.findIndex(
           (el) => el.users.filter((user) => user.name === name)[0]
         );
-        userInSocket = userInSocket.splice(i, 1);
+        userInSocket.splice(i, 1);
         if (gameIndex >= 0) {
           gameElements[gameIndex].removeUser(name);
         }
         if (roomIndex >= 0) {
           roomInSocket[roomIndex].removeUser(name);
+          if (roomInSocket[roomIndex].users.length === 0)
+            roomInSocket.splice(roomIndex, 1);
         }
       }
       console.log(`Client disconnected [id=${socket.id}]`);
-      io.emit('test-done');
     } catch (error) {
       console.error(error);
     }
