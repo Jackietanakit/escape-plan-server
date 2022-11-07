@@ -20,10 +20,10 @@ const updateUserData = async (userData) => {
     .collection('users')
     .updateOne(
       { name: userData.name },
-      { $set: { score: userData.score, avatarId: userData.avatarId } }
+      { $set: { score: userData?.score, avatarId: userData?.avatarId } }
     )
     .then((res) => {
-      console.log(`${userData.name} change score to ${userData.score}`);
+      console.log(`Update User:${userData.name} data`);
     });
 };
 

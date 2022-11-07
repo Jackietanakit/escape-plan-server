@@ -75,7 +75,9 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
       gameEl.giveRole(null);
       gameElements.push(gameEl);
 
-      io.emit('room:start-done', gameEl);
+      console.log(gameEl.map);
+
+      io.in(socket.roomId).emit('room:start-done', gameEl);
     } catch (error) {
       console.error(error);
     }
@@ -115,7 +117,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     try {
       const socket = this;
       let room = roomInSocket.find((x) => x.id === socket.roomId);
-      io.emit('room:current-done', room);
+      socket.emit('room:current-done', room);
     } catch (error) {
       console.error(error);
     }
@@ -123,7 +125,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
 
   const getAllRoom = function () {
     try {
-      io.emit('room:all-done', roomInSocket);
+      socket.emit('room:all-done', roomInSocket);
     } catch (error) {
       console.error(error);
     }

@@ -27,14 +27,9 @@ class GameElement {
     let index = -1;
     if (!name) index = Math.floor(Math.random() * 2);
     else index = this.user.findIndex((x) => x.name == name);
-    console.log(index);
-    console.log(this.users[index]);
     this.users[index].isWarder = true;
     index = index == 0 ? 1 : 0;
     this.users[index].isWarder = false;
-
-    this.users[0].isWarder = true;
-    this.users[1].isWarder = false;
   }
 }
 
