@@ -1,10 +1,10 @@
-const { generateMap } = require('./helper');
+const { generateMap, generateTest } = require('./helper');
 
 class GameElement {
   constructor(hostName, memberName, roomId) {
     this.roomId = roomId;
     this.status = 'playing';
-    this.mapDetail = generateMap();
+    this.mapDetail = generateTest();
     this.users = [
       { name: hostName, isWarder: null },
       { name: memberName, isWarder: null },
@@ -26,10 +26,18 @@ class GameElement {
   giveRole(name) {
     let index = -1;
     if (!name) index = Math.floor(Math.random() * 2);
-    else index = this.user.findIndex((x) => x.name == name);
+    else index = this.users.findIndex((x) => x.name === name);
     this.users[index].isWarder = true;
     index = index == 0 ? 1 : 0;
     this.users[index].isWarder = false;
+  }
+
+  resetGame(name) {
+    this.status = 'playing';
+    let newMap = generateMap();
+    while (this.mapDetail.id === newMap.id) newMap = generateMap();
+    this.mapDetail = newMap;
+    this.giveRole(name);
   }
 }
 

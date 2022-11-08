@@ -4,21 +4,23 @@ module.exports = (io, roomInSocket, gameElements) => {
   const updateCoor = function (coor, isWarderTurn) {
     try {
       const socket = this;
-
+      console.log(
+        `User:${socket.userInfo.name}, Coor: ${coor}, isWarderTurn: ${isWarderTurn}`
+      );
       // Check game
       let i = gameElements.findIndex((x) => x.roomId === socket.roomId);
       if (i === -1) socket.emit('game:error', 'No Game');
       // Coor is null
-      else if (!coor)
+      else if (!coor) {
+        console.log('null check');
         io.in(socket.roomId).emit('game:update-done', {
           mapDetail: gameElements[i].mapDetail,
           isWarderTurn: !isWarderTurn,
         });
+      }
+
       // Update map and check win
       else {
-        console.log(
-          `User:${socket.userInfo.name}, Coor: ${coor}, isWarderTurn: ${isWarderTurn}`
-        );
         let mapDetail = gameElements[i].mapDetail;
         if (isWarderTurn) {
           mapDetail.map[mapDetail.wCoor[0]][mapDetail.wCoor[1]] = 0;
@@ -50,7 +52,7 @@ module.exports = (io, roomInSocket, gameElements) => {
     }
   };
 
-  const gameEnd = function (isWarderWin) {
+  const gameEnd = function () {
     try {
       const socket = this;
       let i = gameElements.findIndex((x) => x.roomId === socket.roomId);
@@ -58,11 +60,16 @@ module.exports = (io, roomInSocket, gameElements) => {
       else {
         gameElements[i].status = 'ended';
 
+        // Update user data
         socket.userInfo.score = socket.userInfo.score + 1;
-
         updateUserData(socket.userInfo);
 
-        io.in(socket.roomId).emit('game:end-done', socket.userInfo);
+        // User info to all user in room
+        io.in(socket.roomId).emit(
+          'game:end-done',
+          gameElements[i],
+          socket.userInfo
+        );
       }
     } catch (error) {
       console.error(error);
@@ -72,5 +79,6 @@ module.exports = (io, roomInSocket, gameElements) => {
   return {
     updateCoor,
     getAllGameElement,
+    gameEnd,
   };
 };

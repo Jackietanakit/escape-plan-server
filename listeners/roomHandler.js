@@ -68,16 +68,30 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
   const startRoom = function (hostName, memberName) {
     try {
       const socket = this;
-      // Create Boardgame
-      let gameEl = new GameElement(hostName, memberName, socket.roomId);
+      if (!socket.roomId) {
+        socket.emit('room:error', 'User is not in any room');
+      } else {
+        // Create Boardgame
+        let gameEl = new GameElement(hostName, memberName, socket.roomId);
 
-      //generate role for player
-      gameEl.giveRole(null);
-      gameElements.push(gameEl);
+        //generate role for player
+        gameEl.giveRole(null);
+        gameElements.push(gameEl);
 
-      console.log(gameEl.map);
+        io.in(socket.roomId).emit('room:start-done', gameEl);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-      io.in(socket.roomId).emit('room:start-done', gameEl);
+  const playAgain = function (name) {
+    try {
+      console.log(name);
+      const socket = this;
+      let i = gameElements.findIndex((x) => x.roomId == socket.roomId);
+      gameElements[i].resetGame(name);
+      io.in(socket.roomId).emit('room:play-again-done', gameElements[i]);
     } catch (error) {
       console.error(error);
     }
@@ -92,11 +106,14 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
       let i = roomInSocket.findIndex((x) => x.id === roomId);
       roomInSocket[i].removeUser(socket.userInfo.name);
 
-      if (roomInSocket[i].users.length === 0) roomInSocket.splice(i, 1);
+      if (roomInSocket[i].users.length === 0) {
+        roomInSocket.splice(i, 1);
+        gameElements = gameElements.filter((x) => x.roomId != roomId);
+      }
 
       // leave room in socket
       socket.leave(roomId);
-      console.log(`User [id=${socket.id} leave room [id=${roomId}]]`);
+      console.log(`User [id=${socket.id}] leave room [id=${roomId}]`);
 
       io.in(roomId).emit('room:leave-done', roomInSocket[i]);
     } catch (error) {
@@ -125,6 +142,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
 
   const getAllRoom = function () {
     try {
+      const socket = this;
       socket.emit('room:all-done', roomInSocket);
     } catch (error) {
       console.error(error);
@@ -140,5 +158,6 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     deleteRoom,
     getCurrentRoom,
     getAllRoom,
+    playAgain,
   };
 };

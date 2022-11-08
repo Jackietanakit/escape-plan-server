@@ -33,17 +33,15 @@ const {
   deleteRoom,
   getCurrentRoom,
   getAllRoom,
+  playAgain,
 } = require('./listeners/roomHandler')(
   io,
   roomInSocket,
   userInSocket,
   gameElements
 );
-const { updateCoor, getAllGameElement } = require('./listeners/gameHandler')(
-  io,
-  roomInSocket,
-  gameElements
-);
+const { updateCoor, getAllGameElement, gameEnd } =
+  require('./listeners/gameHandler')(io, roomInSocket, gameElements);
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
@@ -61,9 +59,11 @@ const onConnection = (socket) => {
   socket.on('room:delete', deleteRoom);
   socket.on('room:current', getCurrentRoom);
   socket.on('room:all', getAllRoom);
+  socket.on('room:play-again', playAgain);
 
   socket.on('game:update', updateCoor);
   socket.on('game:all', getAllGameElement);
+  socket.on('game:end', gameEnd);
   socket.on('test', test);
 };
 
