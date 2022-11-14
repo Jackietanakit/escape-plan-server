@@ -40,7 +40,7 @@ const {
   userInSocket,
   gameElements
 );
-const { updateCoor, getAllGameElement, gameEnd } =
+const { updateCoor, getAllGameElement, gameEnd, chat } =
   require('./listeners/gameHandler')(io, roomInSocket, gameElements);
 
 const onConnection = (socket) => {
@@ -64,11 +64,13 @@ const onConnection = (socket) => {
   socket.on('game:update', updateCoor);
   socket.on('game:all', getAllGameElement);
   socket.on('game:end', gameEnd);
+  socket.on('game:chat', chat);
+
   socket.on('test', test);
 };
 
 app.get('/', (req, res) => {
-  res.send('<h1>Server is running</h1>');
+  res.send('<button onclick=test()>Click Me!</button>');
 });
 
 io.on('connection', onConnection);

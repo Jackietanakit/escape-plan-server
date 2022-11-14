@@ -76,9 +76,19 @@ module.exports = (io, roomInSocket, gameElements) => {
     }
   };
 
+  const chat = function (message) {
+    try {
+      const socket = this;
+      io.in(socket.roomId).emit('game:chat-done', message, socket.userInfo);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return {
     updateCoor,
     getAllGameElement,
     gameEnd,
+    chat,
   };
 };

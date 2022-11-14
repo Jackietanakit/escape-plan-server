@@ -98,6 +98,8 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
 
   const test = function () {
     try {
+      console.log('test');
+      socket.emit('test-done', 'test');
     } catch (error) {
       console.error(error);
     }
