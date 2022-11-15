@@ -45,6 +45,7 @@ const { updateCoor, getAllGameElement, gameEnd, chat } =
 
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
+
   socket.on('user:login', userLogin);
   socket.on('user:info', getUserInfo);
   socket.on('user:get-all', getAllUser);
@@ -55,11 +56,11 @@ const onConnection = (socket) => {
   socket.on('room:join', joinRoom);
   socket.on('room:starting', startSignal);
   socket.on('room:start', startRoom);
+  socket.on('room:play-again', playAgain);
   socket.on('room:leave', leaveRoom);
   socket.on('room:delete', deleteRoom);
   socket.on('room:current', getCurrentRoom);
   socket.on('room:all', getAllRoom);
-  socket.on('room:play-again', playAgain);
 
   socket.on('game:update', updateCoor);
   socket.on('game:all', getAllGameElement);
@@ -69,10 +70,17 @@ const onConnection = (socket) => {
   socket.on('test', test);
 };
 
+app.use(express.static('public'));
+
 app.get('/', (req, res) => {
-  res.send('<button onclick=test()>Click Me!</button>');
+  res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/clicked', (req, res) => {
+  const click = { clickTime: new Date() };
+  console.log(click);
+  res.sendStatus(200);
+});
 io.on('connection', onConnection);
 
 server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
