@@ -27,4 +27,13 @@ const updateUserData = async (userData) => {
     });
 };
 
-module.exports = { createUser, findUser, updateUserData };
+const deleteCollection = async () => {
+  return await dbo
+    .collection('users')
+    .deleteMany({})
+    .then((res) => {
+      console.log(`Delete all users`);
+    });
+};
+
+module.exports = { createUser, findUser, updateUserData, deleteCollection };

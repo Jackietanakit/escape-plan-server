@@ -1,9 +1,93 @@
 const { makeId } = require('../util/helper');
 const { GameElement } = require('../util/gameElement');
 const { RoomDetail } = require('../util/roomDetail');
-const { updateUserData } = require('../schema/user');
+const {
+  createUser,
+  findUser,
+  updateUserData,
+  deleteCollection,
+} = require('../schema/user');
 
 module.exports = (io, roomInSocket, userInSocket, gameElements) => {
+  const userLogin = async function (name, avatarId) {
+    try {
+      const socket = this;
+      // Check if user is already login
+      if (userInSocket.find((x) => x.name == name))
+        socket.emit('user:error', `already login`);
+      else {
+        // Find existing user in database
+        var userData = await findUser(name);
+        if (userData == null) {
+          userData = { name: name, score: 0, avatarId: avatarId };
+          createUser(userData);
+        }
+
+        // Update user avatar
+        if (userData.avatarId != avatarId) {
+          userData.avatarId = avatarId;
+          updateUserData(userData);
+        }
+
+        // Add user to socket
+        const userInfo = {
+          name: name,
+          score: userData.score,
+          avatarId: avatarId,
+        };
+        socket.userInfo = userInfo;
+        userInSocket.push({ name: name, socketId: socket.id });
+        console.log(socket.userInfo);
+        socket.emit('user:login-done', socket.userInfo);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getUserInfo = function () {
+    try {
+      const socket = this;
+      if (socket.userInfo) socket.emit('user:info-done', socket.userInfo);
+      else socket.emit('user:error', 'User is not login');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getAllUser = function () {
+    try {
+      const socket = this;
+      socket.emit('user:get-all-done', userInSocket);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const resetSpecificUser = function (name) {
+    try {
+      const socket = this;
+      let userInfo = {
+        name: name,
+        score: 0,
+      };
+      updateUserData(userInfo);
+      socket.on('user:reset-done', userInfo);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const resetAllUserScore = function () {
+    try {
+      const socket = this;
+      deleteCollection();
+      socket.emit('user:reset-all-done', 'success');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const createRoom = function () {
     try {
       const socket = this;
@@ -59,7 +143,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
   const startSignal = function () {
     try {
       const socket = this;
-      io.in(socket.roomId).emit('room:starting-done', 'kuay');
+      io.in(socket.roomId).emit('room:starting-done');
     } catch (error) {
       console.log(error);
     }
@@ -71,15 +155,14 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
       if (!socket.roomId) {
         socket.emit('room:error', 'not in room');
       } else {
-        let i = gameElements.findIndex((x) => x.roomId === socket.roomId);
-        if (i === -1) {
+        // Check if game in room already exist
+        if (!gameElements.find((x) => x.roomId === socket.roomId)) {
           // Create Boardgame
           let gameEl = new GameElement(hostName, memberName, socket.roomId);
 
           //generate role for player
           gameEl.giveRole(null);
           gameElements.push(gameEl);
-          console.log(gameElements);
 
           io.in(socket.roomId).emit('room:start-done', gameEl);
         }
@@ -91,7 +174,6 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
 
   const playAgain = function (name) {
     try {
-      console.log(name);
       const socket = this;
       let i = gameElements.findIndex((x) => x.roomId == socket.roomId);
       gameElements[i].resetGame(name);
@@ -113,23 +195,14 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
       if (roomInSocket[i].users.length === 0) {
         roomInSocket.splice(i, 1);
         gameElements = gameElements.filter((x) => x.roomId != roomId);
-        console.log(gameElements);
       }
 
       // leave room in socket
       socket.leave(roomId);
-      console.log(`User [id=${socket.id}] leave room [id=${roomId}]`);
+      delete socket.roomId;
+      console.log(`${socket.userInfo.name} leave room ${roomId}`);
 
       io.in(roomId).emit('room:leave-done', roomInSocket[i]);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const deleteRoom = function (roomId) {
-    try {
-      roomInSocket = roomInSocket.filter((x) => x.roomId != roomId);
-      io.emit('room:delete-done', roomInSocket);
     } catch (error) {
       console.error(error);
     }
@@ -139,7 +212,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     try {
       const socket = this;
       let room = roomInSocket.find((x) => x.id === socket.roomId);
-      socket.emit('room:current-done', room[0]);
+      socket.emit('room:current-done', room);
     } catch (error) {
       console.error(error);
     }
@@ -208,13 +281,9 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
   const gameEnd = function () {
     try {
       const socket = this;
-      console.log(socket.roomId);
-      console.log(gameElements);
       let i = gameElements.findIndex((x) => x.roomId == socket.roomId);
-      console.log(i);
-      if (i === -1) socket.emit('game:error', gameElements);
+      if (i === -1) socket.emit('game:error', 'No Game');
       else {
-        console.log('Game End');
         gameElements[i].status = 'ended';
 
         // Update user data
@@ -242,13 +311,60 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     }
   };
 
+  const resetGame = function (roomId) {
+    try {
+      const socket = this;
+      let i = gameElements.findIndex((x) => x.roomId == roomId);
+      gameElements[i].resetGame();
+      io.in(roomId).emit('game:reset-done', gameElements[i]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const disconnect = function () {
+    try {
+      const socket = this;
+      let i = userInSocket.findIndex((x) => x.socketId === socket.id);
+      if (i >= 0) {
+        let name = userInSocket[i].name;
+        // Delete user in socket
+        userInSocket.splice(i, 1);
+        // Delete user in game
+        let gameIndex = gameElements.findIndex(
+          (el) => el.users.filter((user) => user.name === name)[0]
+        );
+        if (gameIndex >= 0) {
+          gameElements[gameIndex].removeUser(name);
+        }
+
+        // Delete user in room
+        let roomIndex = roomInSocket.findIndex(
+          (el) => el.users.filter((user) => user.name === name)[0]
+        );
+        if (roomIndex >= 0) {
+          let roomId = roomInSocket[roomIndex].id;
+          roomInSocket[roomIndex].removeUser(name);
+          console.log('user disconnect: ', name);
+          io.in(roomId).emit('user:disconnect', roomInSocket[roomIndex]);
+          if (roomInSocket[roomIndex].users.length === 0) {
+            roomInSocket.splice(roomIndex, 1);
+            gameElements.splice(gameIndex, 1);
+          }
+        }
+      }
+      console.log(`Client disconnected [id=${socket.id}]`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return {
     createRoom,
     joinRoom,
     startSignal,
     startRoom,
     leaveRoom,
-    deleteRoom,
     getCurrentRoom,
     getAllRoom,
     playAgain,
@@ -256,5 +372,12 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     getAllGameElement,
     gameEnd,
     chat,
+    userLogin,
+    getUserInfo,
+    getAllUser,
+    resetSpecificUser,
+    resetAllUserScore,
+    resetGame,
+    disconnect,
   };
 };
