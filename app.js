@@ -34,15 +34,16 @@ const {
   getCurrentRoom,
   getAllRoom,
   playAgain,
+  updateCoor,
+  getAllGameElement,
+  gameEnd,
+  chat,
 } = require('./listeners/roomHandler')(
   io,
   roomInSocket,
   userInSocket,
   gameElements
 );
-const { updateCoor, getAllGameElement, gameEnd, chat } =
-  require('./listeners/gameHandler')(io, roomInSocket, gameElements);
-
 const onConnection = (socket) => {
   console.log(`Client connected [id=${socket.id}]`);
 
@@ -69,8 +70,6 @@ const onConnection = (socket) => {
 
   socket.on('test', test);
 };
-
-app.use(express.static('public'));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');

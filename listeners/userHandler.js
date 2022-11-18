@@ -5,7 +5,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     try {
       const socket = this;
       if (userInSocket.find((x) => x.name == name))
-        socket.emit('user:error', `Username: ${name} is already login`);
+        socket.emit('user:error', `already login`);
       else {
         // Find existing user in database
         var userData = await findUser(name);
