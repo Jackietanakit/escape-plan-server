@@ -1,10 +1,10 @@
-const { generateMap, generateTest } = require('./helper');
+const { generateMap } = require('./helper');
 
 class GameElement {
   constructor(hostName, memberName, roomId) {
     this.roomId = roomId;
     this.status = 'playing';
-    this.mapDetail = generateTest();
+    this.mapDetail = generateMap();
     this.users = [
       { name: hostName, isWarder: null },
       { name: memberName, isWarder: null },

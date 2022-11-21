@@ -155,22 +155,6 @@ const generateMap = () => {
   };
 };
 
-const generateTest = () => {
-  return {
-    id: 'kauy',
-    map: [
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 1],
-      ['p', 'h', 1, 1, 1],
-      ['w', 0, 1, 1, 1],
-    ],
-    pCoor: [3, 0],
-    wCoor: [4, 0],
-    hCoor: [3, 1],
-  };
-};
-
 const makeId = (length) => {
   var result = '';
   var characters = '0123456789';
