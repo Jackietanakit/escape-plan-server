@@ -176,4 +176,4 @@ function arraysEqual(a, b) {
   return true;
 }
 
-module.exports = { generateMap, generateTest, makeId, arraysEqual };
+module.exports = { generateMap, makeId, arraysEqual };
