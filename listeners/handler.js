@@ -1,6 +1,6 @@
 const { makeId } = require('../util/helper');
-const { GameElement } = require('../util/gameElement');
-const { RoomDetail } = require('../util/roomDetail');
+const { GameElement } = require('../entity/gameElement');
+const { RoomDetail } = require('../entity/roomDetail');
 const {
   createUser,
   findUser,

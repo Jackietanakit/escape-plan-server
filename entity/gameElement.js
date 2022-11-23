@@ -1,4 +1,4 @@
-const { generateMap } = require('./helper');
+const { generateMap } = require('../util/helper');
 
 class GameElement {
   constructor(hostName, memberName, roomId) {
