@@ -23,6 +23,7 @@ const {
   startSignal,
   startRoom,
   leaveRoom,
+  deleteAllRoom,
   getCurrentRoom,
   getAllRoom,
   playAgain,
@@ -61,6 +62,7 @@ const onConnection = (socket) => {
   socket.on('room:leave', leaveRoom);
   socket.on('room:current', getCurrentRoom);
   socket.on('room:all', getAllRoom);
+  socket.on('room:delete-all', deleteAllRoom);
 
   socket.on('game:update', updateCoor);
   socket.on('game:all', getAllGameElement);

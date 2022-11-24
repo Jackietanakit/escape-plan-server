@@ -208,6 +208,17 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     }
   };
 
+  const deleteAllRoom = function () {
+    try {
+      const socket = this;
+      roomInSocket = [];
+      gameElements = [];
+      io.emit('room:delete-all-done', 'success');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const getCurrentRoom = function () {
     try {
       const socket = this;
@@ -365,6 +376,7 @@ module.exports = (io, roomInSocket, userInSocket, gameElements) => {
     startSignal,
     startRoom,
     leaveRoom,
+    deleteAllRoom,
     getCurrentRoom,
     getAllRoom,
     playAgain,
